@@ -4,7 +4,17 @@ import {
   shell,
   BrowserWindow,
   MenuItemConstructorOptions,
+  BrowserView,
 } from 'electron';
+import { Notification } from 'electron/main';
+import { printPageByMessage } from './socketService/printPage';
+
+const testData = {
+  x: [1, 3],
+  y: {
+    y: 1
+  }
+}
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -53,6 +63,7 @@ export default class MenuBuilder {
   }
 
   buildDarwinTemplate(): MenuItemConstructorOptions[] {
+    const that = this;
     const subMenuAbout: DarwinMenuItemConstructorOptions = {
       label: 'Electron',
       submenu: [
@@ -156,28 +167,81 @@ export default class MenuBuilder {
       submenu: [
         {
           label: 'Learn More',
-          click() {
-            shell.openExternal('https://electronjs.org');
+          click: async () => {
+            // shell.openExternal('https://electronjs.org');
+
+            let view = new BrowserView({
+              webPreferences: {
+                nodeIntegration: false,
+              },
+            });
+            that.mainWindow.setBrowserView(view);
+            view.setBounds({ x: 0, y: 0, width: 300, height: 300 });
+            view.webContents.loadURL('https://localhost:3334/eleprinttest#/');
+            view.webContents.executeJavaScript("window.x(" +  110 + ")").then(v => {
+              console.log('v', v);
+              view.webContents.print({ silent: true });
+            });
+
+
+            let view2 = new BrowserView({
+              webPreferences: {
+                nodeIntegration: false,
+              },
+            });
+            that.mainWindow.setBrowserView(view2);
+            view2.setBounds({ x: 0, y: 0, width: 300, height: 300 });
+            view2.webContents.loadURL('https://localhost:3334/eleprinttest#/');
+            view2.webContents.executeJavaScript("window.x(" +  120 + ")").then(v => {
+              console.log('v', v);
+              view2.webContents.print({ silent: true });
+            });
           },
         },
         {
-          label: 'Documentation',
+          label: 'Notification',
           click() {
-            shell.openExternal(
-              'https://github.com/electron/electron/tree/main/docs#readme'
-            );
+            new Notification({ title: 'hello world' }).show();
+            setTimeout(() => {
+              new Notification({ title: 'hello world2' }).show();
+            }, 1000);
           },
         },
         {
-          label: 'Community Discussions',
-          click() {
-            shell.openExternal('https://www.electronjs.org/community');
+          label: 'Print Test',
+          click: async () => {
+            // console.time('PrintTest');
+
+            Promise.all([
+              printPageByMessage({
+                pageMessage: { url: 'https://localhost:3333/eleprinttest' },
+                mainWindow: that.mainWindow,
+              }),
+
+              // printPageByMessage({
+              //   pageMessage: { url: 'https://www.baidu.com' },
+              //   mainWindow: that.mainWindow,
+              // }),
+
+              // printPageByMessage({
+              //   pageMessage: { url: 'https://www.taobao.com' },
+              //   mainWindow: that.mainWindow,
+              // }),
+            ]).then((e) => {
+              // console.timeEnd('PrintTest');
+            });
+
           },
         },
         {
           label: 'Search Issues',
           click() {
-            shell.openExternal('https://github.com/electron/electron/issues');
+            // shell.openExternal('https://github.com/electron/electron/issues');
+
+            that.mainWindow.webContents.executeJavaScript("window.x(" +  JSON.stringify(testData) + ")").then(v => {
+              console.log('v', v);
+              that.mainWindow.webContents.print({ silent: true });
+            });
           },
         },
       ],

@@ -9,11 +9,21 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  webContents,
+  BrowserView,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { initSocketService } from './socketService';
+
+// win.loadURL('http://github.com')
 
 class AppUpdater {
   constructor() {
@@ -27,7 +37,6 @@ let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
   event.reply('ipc-example', msgTemplate('pong'));
 });
 
@@ -83,6 +92,7 @@ const createWindow = async () => {
   });
 
   mainWindow.loadURL(resolveHtmlPath('index.html'));
+  // mainWindow.loadURL('https://localhost:3334/eleprinttest#/');
 
   mainWindow.on('ready-to-show', () => {
     if (!mainWindow) {
@@ -93,6 +103,8 @@ const createWindow = async () => {
     } else {
       mainWindow.show();
     }
+    mainWindow.webContents.executeJavaScript('window.x(3)');
+    console.log('mainWindow', mainWindow);
   });
 
   mainWindow.on('closed', () => {
@@ -108,9 +120,17 @@ const createWindow = async () => {
     return { action: 'deny' };
   });
 
+  console.log('mainWindow', mainWindow);
+
+  // mainWindow.webContents.print({ silent: true }, (success, failRes) => {
+  //   console.log('onCallBack', success, failRes);
+  // });
+
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+
+  return mainWindow;
 };
 
 /**
@@ -127,12 +147,16 @@ app.on('window-all-closed', () => {
 
 app
   .whenReady()
-  .then(() => {
-    createWindow();
-    app.on('activate', () => {
+  .then(async () => {
+    const mainwindow = await createWindow();
+    initSocketService(mainWindow);
+    app.on('activate', async () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (mainWindow === null) createWindow();
+      if (mainWindow === null) {
+        const mainwindow = await createWindow();
+        initSocketService(mainWindow);
+      }
     });
   })
   .catch(console.log);
