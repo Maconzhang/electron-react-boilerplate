@@ -55,7 +55,7 @@ export default class MenuBuilder {
         {
           label: 'Inspect element',
           click: () => {
-            this.mainWindow.webContents.inspectElement(x, y);
+            this.mainWindow.webContents.send('onClientMessage', 1)
           },
         },
       ]).popup({ window: this.mainWindow });
@@ -119,6 +119,13 @@ export default class MenuBuilder {
           accelerator: 'Command+R',
           click: () => {
             this.mainWindow.webContents.reload();
+          },
+        },
+        {
+          label: 'Send Message TO Render Process',
+          accelerator: 'Command+R',
+          click: () => {
+            this.mainWindow.webContents.send('onClientMessage', { x: 111 })
           },
         },
         {

@@ -20,4 +20,8 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
   },
+
+  onClientMessage: (callback) => ipcRenderer.on('onClientMessage', callback),
+  onSocketMessage: (callback) => ipcRenderer.on('onSocketMessage', callback),
+  onSocketMessages: (callback) => ipcRenderer.on('onSocketMessages', callback)
 });

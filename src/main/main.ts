@@ -148,13 +148,16 @@ app
   .whenReady()
   .then(async () => {
     const mainwindow = await createWindow();
-    initSocketService(mainWindow);
+    app._mainWindow = mainWindow;
+    initSocketService();
     app.on('activate', async () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
+      // macos 系统中复用原来的socket，但是window会重新初始化，有点sb
       if (mainWindow === null) {
         const mainwindow = await createWindow();
-        initSocketService(mainWindow);
+        app._mainWindow = mainWindow;
+        // initSocketService(mainWindow);
       }
     });
   })
