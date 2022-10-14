@@ -126,8 +126,8 @@ function sendMessageAsync(message: {}) {
 }
 
 // 多进程打印（打印顺序不好控制）
-let browserViewAche = [];
-let waitMessage = [];
+let browserViewAche: BrowserView[] = [];
+let waitMessage: {}[] = [];
 async function printPage({ e, io, client }) {
   const { message, url, mode, printOption = {} } = e;
   if (browserViewAche.length > 0) {
@@ -163,7 +163,7 @@ async function printPage({ e, io, client }) {
       sendMessageAsync({ e, messageAche, log });
       (view.webContents as any).destroy();
 
-      remove(browserViewAche, (n) => n == view);
+      remove(browserViewAche, (n: BrowserView) => n == view);
 
       const newMessage = waitMessage.shift();
       newMessage && printPage({ ...newMessage, io });

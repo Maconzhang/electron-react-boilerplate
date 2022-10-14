@@ -6,7 +6,7 @@ import {
   MenuItemConstructorOptions,
   BrowserView,
 } from 'electron';
-import { Notification } from 'electron/main';
+// import { Notification } from 'electron/main';
 import { printPageByMessage } from './socketService/printPage';
 
 const testData = {
@@ -208,10 +208,10 @@ export default class MenuBuilder {
         {
           label: 'Notification',
           click() {
-            new Notification({ title: 'hello world' }).show();
-            setTimeout(() => {
-              new Notification({ title: 'hello world2' }).show();
-            }, 1000);
+            // new Notification({ title: 'hello world' }).show();
+            // setTimeout(() => {
+            //   new Notification({ title: 'hello world2' }).show();
+            // }, 1000);
           },
         },
         {
